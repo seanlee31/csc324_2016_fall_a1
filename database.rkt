@@ -106,11 +106,7 @@ A function that takes:
       #t
       #f))
 
-(define Person
-  '(("Name" "Age" "LikesChocolate") 
-    ("David" 0 #t) 
-    ("Jen" 0 #t) 
-    ("Paul" 100 #f)))
+
 
 (define (helper2 f table)
   (filter f (tuples table)))
@@ -152,8 +148,8 @@ A function 'replace-attr' that takes:
                                    
 ;BASIC SELECT
 
-(define (basic_select attrs table)
-  (helper5 (attributes table) attrs table))
+(define (basic_select names table)
+  (helper5 (attributes table) names table))
 
 
 ;MULTIPLE TABLES HELPERS
@@ -183,10 +179,16 @@ A function 'replace-attr' that takes:
 ;MULTIPLE TABLES
 
 ;FILTERING TUPLES HELPERS
-
-
+(define (create-unary f name value attrs)
+  (lambda(tuple)
+    (if (f (helper1 attrs name tuple) value)
+        #t
+        #f)))
+  
 ;FILTERING TUPLES
-
+(define (filter-tuples table pred)
+  (helper2 (create-unary (first pred) (second pred) (third pred) (attributes table)) table))
+  
 
 ;ORDER BY HELPERS
 
