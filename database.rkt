@@ -17,6 +17,21 @@
   (syntax-rules ()
   ((If a b c)
   (if a b c))))
+
+(define-syntax And
+  (syntax-rules ()
+    ((And x y)
+     (if (equal? #f x)
+         #f
+         y))))
+
+(define-syntax Or
+  (syntax-rules ()
+    ((Or a b)
+     (if (equal? #t a)
+         #t
+         b))))
+
 ; Please do define And, Or as syntactic forms
 ; We have actually done this in class you may use the class code and this week's lab code for this.
   
@@ -68,9 +83,12 @@ A function that takes:
 
   and returns the value of the tuple corresponding to that attribute.
 |#
-(define (helper1 attrs name tup) 
-  (if (empty? tup) '()
-  (if (equal? (first attrs) name) (first tup) (helper1 (rest attrs) name (rest tup)))))
+(define (helper1 attrs name tuple) 
+  (if (empty? tuple)
+      '()
+      (if (equal? (first attrs) name)
+          (first tuple)
+          (helper1 (rest attrs) name (rest tuple)))))
 
 
 #|
@@ -82,8 +100,11 @@ A function that takes:
   that satisfy 'f'.
 |#
 
-(define (test2 tup)
-  (if (equal? (second tup) 0) #t #f))
+;TESTING FOR HELPER2
+(define (test_helper2 tuple)
+  (if (equal? (second tuple) 0)
+      #t
+      #f))
 
 (define Person
   '(("Name" "Age" "LikesChocolate") 
@@ -91,11 +112,8 @@ A function that takes:
     ("Jen" 0 #t) 
     ("Paul" 100 #f)))
 
-;the 2 things above is just for testing
-
 (define (helper2 f table)
-  (filter f (tuples table))
-   )
+  (filter f (tuples table)))
 
 
 #|
@@ -109,30 +127,36 @@ A function 'replace-attr' that takes:
     - Otherwise, just ignore the tuple and return 'x'.
 |#
 
-(define (helper3 x attrs)
-   (lambda (tup)
-     (if (empty? (helper1 attrs x tup)) x
-         (helper1 attrs x tup))))
+(define (replace-attr x attrs)
+   (lambda (tuple)
+     (if (empty? (helper1 attrs x tuple))
+         x
+         (helper1 attrs x tuple))))
 
 
 
 ;actual code starts here
-;Basic Selection
 
-;similiar to helper 1, but takes a list of names and returns a lst of values matched
+;BASIC SELECT HELPERS
 
-(define (helper4 attrs names tup)
-  (if (equal? names "*") tup
-      (map (lambda (input) (helper1 attrs input tup)) names)))
+;similiar to helper1, but takes a list of names and returns a lst of values matched
+(define (helper4 attrs names tuple)
+  (if (equal? names "*")
+      tuple
+      (map (lambda (input)
+             (helper1 attrs input tuple)) names)))
 
-;similiar to helper5 but takes a table instead of a tup
+;similiar to helper4 but takes a table instead of a tuple
 (define (helper5 attrs names table)
   (map (lambda (input) (helper4 attrs names input)) (tuples table)))
                                    
-         
+;BASIC SELECT
+
 (define (basic_select attrs table)
   (helper5 (attributes table) attrs table))
 
+
+;MULTIPLE TABLES HELPERS
 (define (add lst table)
   (map (lambda (table1) (append lst table1)) table))
          
@@ -155,6 +179,20 @@ A function 'replace-attr' that takes:
     [(change-all p q ...)
      (cons )]
     ))
+
+;MULTIPLE TABLES
+
+;FILTERING TUPLES HELPERS
+
+
+;FILTERING TUPLES
+
+
+;ORDER BY HELPERS
+
+;ORDER BY
+
+
   
 ; Starter for Part 3; feel free to ignore!
 
