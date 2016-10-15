@@ -100,14 +100,6 @@ A function that takes:
   that satisfy 'f'.
 |#
 
-;TESTING FOR HELPER2
-(define (test_helper2 tuple)
-  (if (equal? (second tuple) 0)
-      #t
-      #f))
-
-
-
 (define (helper2 f table)
   (filter f (tuples table)))
 
@@ -160,6 +152,9 @@ A function 'replace-attr' that takes:
         (if (or (empty? table1) (empty? table2)) '()
            (apply append (map (lambda (lst1) (add lst1 table2)) table1))))
 
+(define (multicartesian tuples)
+  (if (equal? 1 (length tuples)) (first tuples)
+      (cartesian-product (first tuples) (multicartesian (rest tuples)))))
 
 ;check if 2 lists have the same values, if yes. append the name of the list to that attr
 (define (check-duplicate attr1 name attr2)
@@ -168,13 +163,50 @@ A function 'replace-attr' that takes:
                 (cons (string-append name "." (first attr1)) (check-duplicate (rest attr1) name attr2))
                 (cons (first attr1) (check-duplicate (rest attr1) name attr2)))))
 
-(define-syntax change-all
+;return all the table names from a table list
+(define (table-names tablelist)
+  (if (empty? tablelist) '()
+      (cons (cdr (first tablelist)) (table-names (rest tablelist)))))
+
+;return all the table attributes from a table list
+(define (tableattrs tablelist)
+  (if (empty? tablelist) '()
+      (cons (first (car (first tablelist))) (tableattrs (rest tablelist)))))
+
+;return all the table tuples from a table list
+(define (tabletuples tablelist)
+  (if (empty? tablelist) '()
+      (cons (tuples (car (first tablelist))) (tabletuples (rest tablelist)))))
+      
+
+(define (open-bracket table)
+  (if (empty? table) '()
+      (append (first table) (open-bracket (rest table)))))
+
+(define (change-all2 attrs names attrs2)
+  (if (empty? attrs) '()
+      (cons (check-duplicate (first attrs) (first names) (open-bracket(remove (first attrs) attrs2)))
+            (change-all2 (rest attrs) (rest names)  attrs2))))
+  ;(map (lambda (input1 input2)
+   ;      (check-duplicate  input1 input2 (remove input1 attrs)))
+    ;    attrs names))
+
+
+(define (final-table tablelist)
+  (append
+   (list (open-bracket 
+  (change-all2 (tableattrs tablelist) (table-names tablelist) (tableattrs tablelist))))
+   (multicartesian (tabletuples tablelist))))
+
+;final answer
+(define-syntax multi-select
   (syntax-rules ()
-    [(change-all ) '()]
-    [(change-all p) p]
-    [(change-all p q ...)
-     (cons )]
-    ))
+    [(multi-select <attrs> <table>) (basic_select <attrs> <table>)]
+    ;(if (equal? (length (list ...)) 1) (basic_select attrs ...)
+    [(multi-select <attrs> <table> ...)
+    (basic_select <attrs> (final-table (list <table> ...)))]))
+
+
 
 ;MULTIPLE TABLES
 
@@ -194,6 +226,35 @@ A function 'replace-attr' that takes:
 
 ;ORDER BY
 
+;add the sorted value of each list to the front of the list for real number
+(define (add-to <attr> table)
+  (map
+   (lambda(input1 input2) (append input1 input2)) (helper5 (first table) <attr> table) (rest table))) 
+
+
+(define (single-sort table)
+  (sort table #:key (lambda (x) (first x)) <))
+
+
+(define (remove-add table)
+ (map
+  (lambda (input) (remove (first input) input)) table))
+
+
+(define (final-single-sort table name)
+  (append (attributes table) (remove-add (single-sort (add-to (list name) table)))))
+
+
+;complex number sort
+
+(define (complex-add <attr> table)
+  (map
+   (lambda(input1 input2) (append (list (string-length (first input1))) input2)) (helper5 (first table) <attr> table) (rest table)))
+
+;(define final-complex
+  ;(syntax-rules ()
+   ; [(final-complex table <attr>) (complex-add <attr> table)]
+   ; [])
 
   
 ; Starter for Part 3; feel free to ignore!
